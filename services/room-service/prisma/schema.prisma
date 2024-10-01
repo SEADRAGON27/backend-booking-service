@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Room {
+  id              String           @id @default(uuid())
+  name            String           @unique
+  location        String
+  type            String
+  capacity        Int
+  description     String
+  originalPrice   Decimal          @db.Decimal(7, 2) 
+  discountedPrice Decimal?         @db.Decimal(7, 2)
+  buildingTypeId  Int              @map("buildingTypeId_id")
+  buildingType    BuildingType     @relation("RoomBuildingType", fields: [buildingTypeId], references: [id],onDelete:Cascade) 
+  imageLinks      RoomImageLink[]  @relation("RoomImageLinks")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  @@map("rooms")
+}
+
+model ImageLink {
+  id         Int              @id @default(autoincrement())
+  link       String
+  rooms      RoomImageLink[] @relation("RoomImageLinks")
+  
+  @@map("image_links")
+}
+
+model RoomImageLink {
+  roomId      String
+  imageLinkId Int
+  room        Room       @relation("RoomImageLinks", fields: [roomId], references: [id],onDelete: Cascade)
+  imageLink   ImageLink  @relation("RoomImageLinks", fields: [imageLinkId], references: [id],onDelete: Cascade)
+
+  @@id([roomId, imageLinkId])
+  @@map("room_image_links")
+}
+
+model BuildingType {
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  room          Room[]   @relation("RoomBuildingType")
+
+  @@map("building_types")
+}

@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String             @id @default(uuid())
+  username          String             @unique
+  email             String             @unique
+  role              String             @default("user")
+  password          String?             @map("password")
+  googleId          String?            @map("google_id")
+  isConfirmed       Boolean            @default(false) @map("is_confirmed")
+  confirmationToken String?            @map("confirmation_token")
+  refreshSession    RefreshSession[]   @relation("UserRefreshSession")
+  resetPassword     ResetPassword[]    @relation("UserResetPassword")
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model RefreshSession {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  user          User     @relation("UserRefreshSession", fields: [userId], references: [id], onDelete:Cascade) 
+  fingerprint   String
+  refreshToken  String   @map("refresh_token")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+   
+  @@Index([refreshToken])
+  @@Index([fingerprint])
+  @@map("refresh_sessions")
+}
+
+model ResetPassword {
+  id        Int      @id @default(autoincrement())
+  token     String
+  expiresAt DateTime @map("expires_at")
+  userId    String
+  user      User     @relation("UserResetPassword",fields: [userId], references: [id], onDelete:Cascade) 
+
+  @@map("reset_password_entity")
+}

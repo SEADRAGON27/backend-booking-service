@@ -1,0 +1,7 @@
+**/dist
+**/node_modules
+**/build
+**/migrations
+
+**/package-lock.json
+**/.env
