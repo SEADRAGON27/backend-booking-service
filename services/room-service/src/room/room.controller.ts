@@ -79,7 +79,6 @@ export class RoomController {
   @MessagePattern({ cmd: 'get_room' })
   async getRoom(@Payload() id: string) {
     try {
-      console.log(id);
       const room = await this.roomService.getRoom(id);
 
       this.logger.log(`Room found :${room}`);

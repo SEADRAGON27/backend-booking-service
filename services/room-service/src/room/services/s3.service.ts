@@ -6,11 +6,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class S3Service {
-  private s3: S3Client;
-  private awsBucketName: string;
-  private awsRegion: string;
+  private readonly s3: S3Client;
+  private readonly awsBucketName: string;
+  private readonly awsRegion: string;
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     this.awsBucketName = this.configService.get<string>('AWS_BUCKET_NAME');
     this.awsRegion = this.configService.get<string>('AWS_REGION');
 

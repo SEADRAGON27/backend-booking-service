@@ -5,4 +5,5 @@ export interface CreateNotification {
   meetingId: string;
   userId: string;
   title: string;
+  logId: string;
 }

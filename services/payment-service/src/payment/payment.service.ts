@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
 import { getHtmlForm } from 'src/utils/getHtmlForm';
@@ -8,9 +8,10 @@ import { WinstonLoggerService } from 'src/logs/logger';
 
 @Injectable()
 export class PaymentService {
-  private liqPayPrivateKey: string;
+  private readonly liqPayPrivateKey: string;
   constructor(
-    @Inject('MEETING_EVENTS_SERVICE') private readonly meetingClient: ClientProxy,
+    @Inject('MEETING_EVENTS_SERVICE') private readonly meetingEventsClient: ClientProxy,
+    @Inject('MEETING_SERVICE') private readonly meetingClient: ClientProxy,
     private readonly logger: WinstonLoggerService,
     private readonly configService: ConfigService,
   ) {
@@ -18,6 +19,13 @@ export class PaymentService {
   }
 
   generatePaymentForm(meetingId: string, amount: number) {
+    const meeting = this.meetingClient.send({ cmd: 'get_meeting' }, meetingId).pipe(
+      timeout(5000),
+      catchError(async () => this.logger.error('Meeting service is unavailable!')),
+    );
+
+    if (!meeting) throw new HttpException("Meeting doesn't exist", HttpStatus.NOT_FOUND);
+
     const paymentData = {
       version: 3,
       public_key: this.configService.get<string>('LIQ_PAY_PUBLIC_KEY'),
@@ -56,7 +64,7 @@ export class PaymentService {
       const meetingId: string = decodedData.order_id;
 
       if (decodedData.status === 'success') {
-        this.meetingClient.emit('confirm_meeting', meetingId).pipe(
+        this.meetingEventsClient.emit('confirm_meeting', meetingId).pipe(
           timeout(5000),
           catchError(async () => this.logger.error('Meeting service is unavailable!')),
         );

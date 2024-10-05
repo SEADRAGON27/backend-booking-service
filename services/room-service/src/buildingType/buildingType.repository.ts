@@ -4,7 +4,7 @@ import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class BuildingTypeRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createBuildingTypeData: Prisma.BuildingTypeCreateInput): Promise<BuildingType> {
     return this.prisma.buildingType.create({ data: createBuildingTypeData });

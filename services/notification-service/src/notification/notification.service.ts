@@ -8,8 +8,8 @@ import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class NotificationService {
-  private host: string;
-  private fromEmail: string;
+  private readonly host: string;
+  private readonly fromEmail: string;
 
   constructor(
     private readonly configService: ConfigService,

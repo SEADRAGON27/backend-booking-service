@@ -4,10 +4,11 @@ import { CreateMeetingDto } from './dto/createMeeting.dto';
 import { catchError, timeout } from 'rxjs';
 import { ParsedQs } from 'qs';
 import { CurrentUser } from 'src/decorators/currentUser.decorator';
-import { JwtAuthGuard } from 'src/guard/jwtAuth.guard';
-import { RolesGuard } from 'src/guard/checkRole.guard';
+import { JwtAuthGuard } from 'src/guards/jwtAuth.guard';
+import { RolesGuard } from 'src/guards/checkRole.guard';
 import { Roles } from 'src/decorators/role.decorator';
 import { JwtPayload } from 'src/interfaces/jwtPayload.interface';
+import { v4 as uuidv4 } from 'uuid';
 
 @Controller('/meetings')
 export class MeetingController {
@@ -17,9 +18,9 @@ export class MeetingController {
   @UseGuards(new JwtAuthGuard())
   @UsePipes(new ValidationPipe())
   createMeeting(@Body() createMeetingDto: CreateMeetingDto, @CurrentUser() user: JwtPayload) {
-    console.log(createMeetingDto);
+    const logId = uuidv4();
 
-    return this.meetingClient.send({ cmd: 'create_meeting' }, { createMeetingDto, user }).pipe(
+    return this.meetingClient.send({ cmd: 'create_meeting' }, { createMeetingDto, user, logId }).pipe(
       timeout(5000),
       catchError((error) => {
         throw new HttpException(error.message, error.statusCode);
@@ -29,8 +30,10 @@ export class MeetingController {
 
   @Delete('/:id')
   @UseGuards(new JwtAuthGuard())
-  deleteMeeting(@Param() id: string) {
-    this.meetingClient.send({ cmd: 'delete_meeting' }, id).pipe(
+  deleteMeeting(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    const logId = uuidv4();
+
+    this.meetingClient.send({ cmd: 'delete_meeting' }, { id, logId, user }).pipe(
       timeout(5000),
       catchError((error) => {
         throw new HttpException(error.message, error.statusCode);

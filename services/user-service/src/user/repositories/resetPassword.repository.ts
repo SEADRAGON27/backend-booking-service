@@ -5,7 +5,7 @@ import { ResetPasswordWithUser } from '../types/resetPassword.type';
 
 @Injectable()
 export class ResetPasswordRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(data: { userId: string; token: string; expiresAt: Date }): Promise<ResetPassword> {
     return this.prisma.resetPassword.create({ data });

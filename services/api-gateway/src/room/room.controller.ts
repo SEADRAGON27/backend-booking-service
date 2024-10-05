@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, HttpException, Inject, Param, Post, Put, Query, UploadedFiles, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
-import { JwtAuthGuard } from '../guard/jwtAuth.guard';
+import { JwtAuthGuard } from '../guards/jwtAuth.guard';
 import { CreateRoomDto } from './dto/createRoom.dto';
 import { catchError, timeout } from 'rxjs';
-import { RolesGuard } from 'src/guard/checkRole.guard';
+import { RolesGuard } from 'src/guards/checkRole.guard';
 import { Roles } from 'src/decorators/role.decorator';
 import { UpdateRoomDto } from './dto/updateRoom.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -15,7 +15,7 @@ import { ParsedQs } from 'qs';
 export class RoomController {
   constructor(
     @Inject('ROOM_SERVICE') private readonly client: ClientProxy,
-    private configService: ConfigService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Post('/create')

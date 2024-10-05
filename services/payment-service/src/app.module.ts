@@ -3,9 +3,12 @@ import { PaymentModule } from './payment/payment.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [ ConfigModule.forRoot({
-    isGlobal: true,
-  }), PaymentModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    PaymentModule,
+  ],
   controllers: [],
   providers: [],
 })

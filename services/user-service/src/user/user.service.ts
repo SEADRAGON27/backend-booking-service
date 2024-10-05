@@ -238,7 +238,7 @@ export class UserService {
     };
   }
 
-  async requestPasswordReset(resetPasswordRequestData: ResetPasswordRequest, logId: string) {
+  async resetPasswordRequest(resetPasswordRequestData: ResetPasswordRequest, logId: string) {
     const user = await this.userRepository.findByEmail(resetPasswordRequestData.email);
 
     if (!user) throw new HttpException('User not found', HttpStatus.UNPROCESSABLE_ENTITY);

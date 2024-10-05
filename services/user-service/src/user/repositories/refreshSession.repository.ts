@@ -4,7 +4,7 @@ import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class RefreshSessionRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(data: { userId: string; refreshToken: string; fingerprint: string }): Promise<RefreshSession> {
     return this.prisma.refreshSession.create({ data });

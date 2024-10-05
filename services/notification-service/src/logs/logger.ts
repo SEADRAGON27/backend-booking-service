@@ -5,24 +5,21 @@ import { ElasticsearchTransport } from 'winston-elasticsearch';
 
 @Injectable()
 export class WinstonLoggerService {
-  private logger: winston.Logger;
+  private readonly logger: winston.Logger;
 
-  constructor(private configService:ConfigService) {
+  constructor(private configService: ConfigService) {
     const esTransportOpts = {
-      level: 'info', 
-      clientOpts: { node: configService.get<string>('ELASTICSEARCH_HOST') }, 
+      level: 'info',
+      clientOpts: { node: configService.get<string>('ELASTICSEARCH_HOST') },
     };
 
     this.logger = winston.createLogger({
       level: 'info',
       format: winston.format.json(),
       transports: [
-        new ElasticsearchTransport(esTransportOpts), 
+        new ElasticsearchTransport(esTransportOpts),
         new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.colorize(),
-            winston.format.simple(),
-          ),
+          format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
         }),
       ],
     });
@@ -35,5 +32,4 @@ export class WinstonLoggerService {
   error(message: string) {
     this.logger.error(message);
   }
-
 }

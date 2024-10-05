@@ -123,9 +123,9 @@ export class UserController {
   }
 
   @MessagePattern({ cmd: 'reset_password_request' })
-  async requestPasswordReset(@Payload() resetPasswordRequestData: ResetPasswordRequest, @Payload('logId') logId: string) {
+  async resetPasswordReset(@Payload('resetPasswordRequestDto') resetPasswordRequestData: ResetPasswordRequest, @Payload('logId') logId: string) {
     try {
-      await this.userService.requestPasswordReset(resetPasswordRequestData, logId);
+      await this.userService.resetPasswordRequest(resetPasswordRequestData, logId);
       this.logger.log(`Password reset requested, user data:${JSON.stringify(resetPasswordRequestData)}, logId: ${logId}`);
 
       return { message: 'Password reset email sent.' };
@@ -178,7 +178,7 @@ export class UserController {
   }
 
   @MessagePattern('delete_user')
-  async deleteUser(@Payload() id: string, @Payload('logId') logId: string) {
+  async deleteUser(@Payload('id') id: string, @Payload('logId') logId: string) {
     try {
       await this.userService.deleteUser(id, logId);
       this.logger.log(`User deleted successfully, logId: ${logId}`);

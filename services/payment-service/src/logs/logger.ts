@@ -5,7 +5,7 @@ import { ElasticsearchTransport } from 'winston-elasticsearch';
 
 @Injectable()
 export class WinstonLoggerService {
-  private logger: winston.Logger;
+  private readonly logger: winston.Logger;
 
   constructor(private configService: ConfigService) {
     const esTransportOpts = {

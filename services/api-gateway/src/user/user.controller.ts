@@ -5,8 +5,8 @@ import { CreateUserGoogleDto, CreateUserDto } from './dto/createUser.dto';
 import { Fingerprint, IFingerprint } from 'nestjs-fingerprint';
 import { LoginUserDto } from './dto/loginUser.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
-import { JwtAuthGuard } from '../guard/jwtAuth.guard';
-import { GoogleGuard } from '../guard/google.guard';
+import { JwtAuthGuard } from '../guards/jwtAuth.guard';
+import { GoogleGuard } from '../guards/google.guard';
 import { Request, Response } from 'express';
 import { HttpService } from '@nestjs/axios';
 import { JwtPayload } from '../interfaces/jwtPayload.interface';
@@ -16,7 +16,6 @@ import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from './dto/resetPassword.dto';
 import { ResetPasswordRequestDto } from './dto/resetPasswordRequest.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { CreateMeetingDto } from 'src/meetings/dto/createMeeting.dto';
 
 @Controller('users')
 export class UserController {
@@ -24,22 +23,8 @@ export class UserController {
     @Inject('USER_SERVICE') private readonly client: ClientProxy,
     private readonly httpService: HttpService,
     @Inject('MEETING_SERVICE') private readonly meetingClient: ClientProxy,
-    private configService: ConfigService,
+    private readonly configService: ConfigService,
   ) {}
-
-  @Post('/create')
-  @UseGuards(new JwtAuthGuard())
-  @UsePipes(new ValidationPipe())
-  createMeeting(@Body() createMeetingDto: CreateMeetingDto, @CurrentUser() user: JwtPayload) {
-    console.log(createMeetingDto);
-
-    return this.meetingClient.send({ cmd: 'create_meeting' }, { createMeetingDto, user }).pipe(
-      timeout(5000),
-      catchError((error) => {
-        throw new HttpException(error.message, error.statusCode);
-      }),
-    );
-  }
 
   @Post('/register')
   @UsePipes(new ValidationPipe())
@@ -168,7 +153,9 @@ export class UserController {
   @Post('/reset-paswword-request')
   @UsePipes(new ValidationPipe())
   resetPasswordRequest(@Body() resetPasswordRequestDto: ResetPasswordRequestDto) {
-    return this.client.send({ cmd: 'reset_password_request' }, resetPasswordRequestDto).pipe(
+    const logId = uuidv4();
+
+    return this.client.send({ cmd: 'reset_password_request' }, { resetPasswordRequestDto, logId }).pipe(
       timeout(5000),
       catchError((error) => {
         throw new HttpException(error.message, error.statusCode);
@@ -196,8 +183,9 @@ export class UserController {
   @UseGuards(GoogleGuard)
   googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
     const token = req.user['accessToken'];
+    const host = this.configService.get<string>('HOST');
 
-    return res.redirect(`http://localhost:3000/users/confirm-google?token=${token}`);
+    return res.redirect(`${host}/users/confirm-google?token=${token}`);
   }
 
   @Get('confirm-google')

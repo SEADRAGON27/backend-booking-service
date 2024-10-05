@@ -8,7 +8,7 @@ import { CreateRoom } from 'src/interface/createRoom.interface';
 
 @Injectable()
 export class RoomRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createRoomData: CreateRoom): Promise<Room> {
     const { buildingTypeId, originalPrice, discountedPrice, ...rest } = createRoomData;

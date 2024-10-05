@@ -5,7 +5,7 @@ import { DeserializedFiles } from 'src/interface/deserializedFile.interface';
 
 @Injectable()
 export class ImageLinkRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async createMany(imageLinkData: Prisma.ImageLinkCreateManyInput[]) {
     return this.prisma.imageLink.createManyAndReturn({ data: imageLinkData });

@@ -5,7 +5,7 @@ import { Notification } from '@prisma/client';
 
 @Injectable()
 export class NotificationRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createNotificationData: Prisma.NotificationCreateInput) {
     await this.prisma.notification.create({ data: createNotificationData });

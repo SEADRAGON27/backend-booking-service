@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, Get, HttpException, Inject, Param, Post, Put, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Roles } from 'src/decorators/role.decorator';
-import { JwtAuthGuard } from 'src/guard/jwtAuth.guard';
+import { JwtAuthGuard } from 'src/guards/jwtAuth.guard';
 import { CreateBuildingTypeDto } from './dto/createBuildingType.dto';
 import { catchError, timeout } from 'rxjs';
 import { UpdateBuildingTypeDto } from './dto/updateBuildingType.dto';
-import { RolesGuard } from 'src/guard/checkRole.guard';
+import { RolesGuard } from 'src/guards/checkRole.guard';
 
 @Controller('/building-types')
 export class BuildingTypeController {

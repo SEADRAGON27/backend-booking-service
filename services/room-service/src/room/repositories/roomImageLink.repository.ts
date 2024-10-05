@@ -4,7 +4,7 @@ import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class RoomImageLinkRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(room: Room, imageLink: ImageLink) {
     return this.prisma.roomImageLink.create({
