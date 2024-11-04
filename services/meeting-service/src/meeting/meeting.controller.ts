@@ -5,69 +5,47 @@ import { CreateMeeting } from 'src/interfaces/createMeeting.interface';
 import { ParsedQs } from 'qs';
 import { rmqAck } from 'src/utils/rmqAck';
 import { MeetingUser } from '@prisma/client';
-import { WinstonLoggerService } from 'src/logs/logger';
 import { UserData } from 'src/interfaces/userData.interface';
-import { exceptionType } from 'src/utils/exceptionType';
+import { Log } from 'src/decorators/log.decorator';
+import { WinstonLoggerService } from 'src/logs/logger';
 
 @Controller()
 export class MeetingController {
   constructor(
     private readonly meetingService: MeetingService,
-    private readonly logger: WinstonLoggerService,
+    private logger: WinstonLoggerService,
   ) {}
 
   @MessagePattern({ cmd: 'create_meeting' })
+  @Log()
   async createMeeting(@Payload('user') user: UserData, @Payload('createMeetingDto') createMeetingData: CreateMeeting, @Payload('logId') logId: string) {
-    try {
-      const meeting = await this.meetingService.createMeeting(user, createMeetingData, logId);
-      this.logger.log(`Meeting created: ${JSON.stringify(meeting)}`);
+    const meeting = await this.meetingService.createMeeting(user, createMeetingData, logId);
 
-      return meeting;
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error creating meeting for user: ${user.id}, error: ${error.message}`);
-
-      throw error;
-    }
+    return meeting;
   }
 
   @MessagePattern({ cmd: 'delete_meeting' })
+  @Log()
   async deleteMeeting(@Payload('user') user: MeetingUser, @Payload('id') id: string, @Payload('logId') logId: string) {
-    try {
-      await this.meetingService.deleteMeeting(id, user, logId);
-      this.logger.log(`Meeting with Id: ${id} deleted`);
+    await this.meetingService.deleteMeeting(id, user, logId);
 
-      return { message: 'Meeting deleted' };
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error deleting meeting with ID: ${id}, error: ${error.message}`);
-
-      throw error;
-    }
+    return { message: 'Meeting deleted' };
   }
 
   @MessagePattern({ cmd: 'all_meetings' })
+  @Log()
   async findAll(@Payload() query: ParsedQs) {
-    try {
-      const meetings = await this.meetingService.allMeetings(query);
-      this.logger.log(`Found meetings with query: ${query}`);
+    const meetings = await this.meetingService.allMeetings(query);
 
-      return meetings;
-    } catch (error) {
-      this.logger.error(`Error fetching meetings with query:${query}, error: ${error.message}`);
-      throw error;
-    }
+    return meetings;
   }
 
   @MessagePattern({ cmd: 'user_meetings' })
+  @Log()
   async findUserMeetings(@Payload('query') query: ParsedQs, @Payload('id') id: string) {
-    try {
-      const meetings = await this.meetingService.allUserMeetings(query, id);
-      this.logger.log(`Found meetings for user: ${id} with query:${query}`);
+    const meetings = await this.meetingService.allUserMeetings(query, id);
 
-      return meetings;
-    } catch (error) {
-      this.logger.error(`Error fetching meetings for user: ${id} with query:${query}, error: ${error.message}`);
-      throw error;
-    }
+    return meetings;
   }
 
   @EventPattern('confirm_meeting')
@@ -85,26 +63,16 @@ export class MeetingController {
   }
 
   @EventPattern('delete_meeting_user')
+  @Log()
   async deleteMeetingUser(@Payload() userId: string) {
-    try {
-      await this.meetingService.deleteMeetingUser(userId);
-      this.logger.log(`Meetings for user with ID: ${userId} deleted`);
-    } catch (error) {
-      this.logger.error(`Error deleting meetings for user: ${userId}, error: ${error.message}`);
-      throw error;
-    }
+    await this.meetingService.deleteMeetingUser(userId);
   }
 
   @MessagePattern({ cmd: 'get_meeting' })
+  @Log()
   async getMeeting(@Payload() id: string) {
-    try {
-      const meeting = await this.meetingService.getMeeting(id);
-      this.logger.log(`Meeting fetched with id:${id}`);
+    const meeting = await this.meetingService.getMeeting(id);
 
-      return meeting;
-    } catch (error) {
-      this.logger.error(`Error fetching meeting wuth id:${id}`);
-      throw error;
-    }
+    return meeting;
   }
 }

@@ -3,7 +3,7 @@ import { Controller } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { WinstonLoggerService } from 'src/logs/logger';
-import { exceptionType } from 'src/utils/exceptionType';
+import { Log } from 'src/decorators/log.decorator';
 
 @Controller()
 export class PaymentController {
@@ -13,32 +13,24 @@ export class PaymentController {
   ) {}
 
   @MessagePattern({ cmd: 'generate_webform' })
+  @Log()
   async generatePaymentForm(@Payload('meetingId') meetingId: string, @Payload('amount') amount: number, @Payload('logId') logId: string) {
-    try {
-      const paymentForm = this.paymentService.generatePaymentForm(meetingId, amount);
-      this.logger.log(`Payment form generated successfully,meetingId: ${meetingId}, amount:${amount},  logId:${logId}`);
+    const paymentForm = this.paymentService.generatePaymentForm(meetingId, amount);
+    this.logger.log(`Payment form generated successfully,meetingId: ${meetingId}, amount:${amount},  logId:${logId}`);
 
-      return paymentForm;
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error generating paymentform for data: ${meetingId}`);
-
-      throw error;
-    }
+    return paymentForm;
   }
 
   @MessagePattern({ cmd: 'handle_liqPay_weebHook' })
+  @Log()
   async handleLiqPayWebook(webhookData) {
     let meetingId: string | boolean;
 
     meetingId = await this.handleLiqPayWebook(webhookData);
 
     if (!meetingId) {
-      this.logger.error(`Webhook handling failed for data: ${meetingId}`);
-
       return false;
     }
-
-    this.logger.log(`Webhook handled successfully for ${meetingId}`);
 
     return true;
   }

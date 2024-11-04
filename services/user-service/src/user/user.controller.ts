@@ -6,8 +6,8 @@ import { LoginUser } from './interfaces/loginUser.interface';
 import { UpdateUserDto } from './interfaces/updateUser.interface';
 import { ResetPassword } from './interfaces/resetPassword.interface';
 import { ResetPasswordRequest } from './interfaces/resetPasswordRequest.interface';
+import { Log } from './decorators/log.decorator';
 import { WinstonLoggerService } from 'src/logs/logger';
-import { exceptionType } from './utils/exceptionType';
 
 @Controller()
 export class UserController {
@@ -17,177 +17,97 @@ export class UserController {
   ) {}
 
   @MessagePattern({ cmd: 'create_user' })
-  async createUser(
-    @Payload('createUserDto') createUserData: CreateUser, 
-    @Payload('fingerprintId') fingerprint: string, 
-    @Payload('logId') logId: string
-    ) {
-    try {
-      await this.userService.createUser(createUserData, fingerprint, logId);
-      this.logger.log(`User created successfully, logId: ${logId}, user data: ${JSON.stringify(createUserData)}`);
+  @Log()
+  async createUser(@Payload('createUserDto') createUserData: CreateUser, @Payload('fingerprintId') fingerprint: string, @Payload('logId') logId: string) {
+    await this.userService.createUser(createUserData, fingerprint, logId);
 
-      return {
-        message: 'User registered. Please check your email for the confirmation code.',
-      };
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error creating user, user data: ${JSON.stringify(createUserData)} ,logId: ${logId}, error: ${error.message}`);
-
-      throw error;
-    }
+    return {
+      message: 'User registered. Please check your email for the confirmation code.',
+    };
   }
 
   @MessagePattern({ cmd: 'login_user' })
+  @Log()
   async loginUser(@Payload('loginUserDto') loginUserData: LoginUser, @Payload('fingerprintId') fingerprint: string) {
-    try {
-      const { user, refreshToken } = await this.userService.loginUser(loginUserData, fingerprint);
-      const userResponse = this.userService.buildUserResponse(user);
-      this.logger.log(`User logged in successfully, user data: ${JSON.stringify(loginUserData)}`);
+    const { user, refreshToken } = await this.userService.loginUser(loginUserData, fingerprint);
+    const userResponse = this.userService.buildUserResponse(user);
 
-      return { userResponse, refreshToken };
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error logging in user, user data: ${JSON.stringify(loginUserData)}, error: ${error.message}`);
-
-      throw error;
-    }
+    return { userResponse, refreshToken };
   }
 
   @MessagePattern({ cmd: 'update_user' })
-  async updateUser(
-    @Payload('updateUserDto') updateUserData: UpdateUserDto, 
-    @Payload('id') id: string, 
-    @Payload('logId') logId: string) 
-    {
-    try {
-      const data = await this.userService.updateUser(id, updateUserData, logId);
+  @Log()
+  async updateUser(@Payload('updateUserDto') updateUserData: UpdateUserDto, @Payload('id') id: string, @Payload('logId') logId: string) {
+    const data = await this.userService.updateUser(id, updateUserData, logId);
 
-      if (!data) {
-        this.logger.error(`User update failed, user data: ${JSON.stringify(updateUserData)}, logId: ${logId}`);
+    if (!data) return false;
 
-        return false;
-      }
+    const { user, refreshToken } = data;
+    const userResponse = this.userService.buildUserResponse(user);
 
-      const { user, refreshToken } = data;
-      const userResponse = this.userService.buildUserResponse(user);
-
-      this.logger.log(`User updated successfully,user data: ${JSON.stringify(updateUserData)}, logId: ${logId}`);
-
-      return { userResponse, refreshToken };
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error updating user, user data: ${JSON.stringify(updateUserData)}, logId: ${logId}, error: ${error.message}`);
-
-      throw error;
-    }
+    return { userResponse, refreshToken };
   }
 
   @MessagePattern({ cmd: 'get_user' })
+  @Log()
   async getUser(@Payload() id: string) {
-    try {
-      const user = await this.userService.getUser(id);
-      this.logger.log(`Fetched user successfully,id:${id}`);
+    const user = await this.userService.getUser(id);
 
-      return user;
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error fetching user,id:${id} ,error: ${error.message}`);
-
-      throw error;
-    }
+    return user;
   }
 
   @MessagePattern({ cmd: 'refresh_tokens' })
+  @Log()
   async refresh(@Payload('refreshToken') refreshTokeN: string, @Payload('fingerprintId') fingerprint: string) {
-    try {
-      const { refreshToken, accessToken, tokenExpiration } = await this.userService.refreshTokens(refreshTokeN, fingerprint);
-      this.logger.log(`Tokens refreshed successfully`);
+    const { refreshToken, accessToken, tokenExpiration } = await this.userService.refreshTokens(refreshTokeN, fingerprint);
 
-      return { refreshToken, accessToken, tokenExpiration };
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error refreshing tokens, error: ${error.message}`);
-
-      throw error;
-    }
+    return { refreshToken, accessToken, tokenExpiration };
   }
 
   @MessagePattern({ cmd: 'confirm_email' })
+  @Log()
   async confirmEmailForRegistration(@Payload('token') token: string, @Payload('fingerprintId') fingerprint: string) {
-    try {
-      const { user, refreshToken } = await this.userService.confirmEmail(token, fingerprint);
-      const userResponse = this.userService.buildUserResponse(user);
-      this.logger.log(`Email confirmed successfully`);
+    const { user, refreshToken } = await this.userService.confirmEmail(token, fingerprint);
+    const userResponse = this.userService.buildUserResponse(user);
 
-      return { userResponse, refreshToken };
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error confirming email, error: ${error.message}`);
-
-      throw error;
-    }
+    return { userResponse, refreshToken };
   }
 
   @MessagePattern({ cmd: 'reset_password_request' })
+  @Log()
   async resetPasswordReset(@Payload('resetPasswordRequestDto') resetPasswordRequestData: ResetPasswordRequest, @Payload('logId') logId: string) {
-    try {
-      await this.userService.resetPasswordRequest(resetPasswordRequestData, logId);
-      this.logger.log(`Password reset requested, user data:${JSON.stringify(resetPasswordRequestData)}, logId: ${logId}`);
+    await this.userService.resetPasswordRequest(resetPasswordRequestData, logId);
 
-      return { message: 'Password reset email sent.' };
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error requesting password reset, user data:${JSON.stringify(resetPasswordRequestData)}, logId: ${logId}, error: ${error.message}`);
-
-      throw error;
-    }
+    return { message: 'Password reset email sent.' };
   }
 
   @MessagePattern({ cmd: 'reset_password' })
+  @Log()
   async resetPassword(@Payload('token') token: string, @Payload('resetPasswordDto') resetPasswordData: ResetPassword) {
-    try {
-      await this.userService.resetPassword(token, resetPasswordData);
-      this.logger.log(`Password reset successfully`);
+    await this.userService.resetPassword(token, resetPasswordData);
 
-      return { message: 'Password has been reset.' };
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error resetting password,  error: ${error.message}`);
-
-      throw error;
-    }
+    return { message: 'Password has been reset.' };
   }
 
   @MessagePattern({ cmd: 'success-google' })
-  async successGoogle(
-    @Payload('email') email: string, 
-    @Payload('fingerprintId') fingerprint: string, 
-    @Payload('createUserGoogleDto') createUserGoogleData: CreateUserGoogle) {
-    try {
-      const { refreshToken, user } = await this.userService.finishGoogleAuth(email, createUserGoogleData, fingerprint);
-      this.logger.log(`Google authentication successful, email: ${email}`);
+  @Log()
+  async successGoogle(@Payload('email') email: string, @Payload('fingerprintId') fingerprint: string, @Payload('createUserGoogleDto') createUserGoogleData: CreateUserGoogle) {
+    const { refreshToken, user } = await this.userService.finishGoogleAuth(email, createUserGoogleData, fingerprint);
 
-      return { refreshToken, user };
-    } catch (error) {
-      this.logger.error(`Error during Google authentication, email: ${email}, error: ${error.message}`);
-      throw error;
-    }
+    return { refreshToken, user };
   }
 
   @EventPattern('logout_user')
+  @Log()
   async logoutUser(@Payload() refreshToken: string) {
-    try {
-      await this.userService.deleteRefreshSession(refreshToken);
-      this.logger.log(`User logged out successfully`);
-    } catch (error) {
-      this.logger.error(`Error logging out user, error: ${error.message}`);
-      throw error;
-    }
+    await this.userService.deleteRefreshSession(refreshToken);
   }
 
   @MessagePattern('delete_user')
+  @Log()
   async deleteUser(@Payload('id') id: string, @Payload('logId') logId: string) {
-    try {
-      await this.userService.deleteUser(id, logId);
-      this.logger.log(`User deleted successfully, logId: ${logId}`);
+    await this.userService.deleteUser(id, logId);
 
-      return { message: 'Your profile was deleted' };
-    } catch (error) {
-      if (exceptionType(error)) this.logger.error(`Error deleting user, logId: ${logId}, error: ${error.message}`);
-
-      throw error;
-    }
+    return { message: 'Your profile was deleted' };
   }
 }

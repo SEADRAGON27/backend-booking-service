@@ -7,7 +7,7 @@ import { ElasticsearchTransport } from 'winston-elasticsearch';
 export class WinstonLoggerService {
   private readonly logger: winston.Logger;
 
-  constructor(private configService: ConfigService) {
+  constructor(private configService?: ConfigService) {
     const esTransportOpts = {
       level: 'info',
       clientOpts: { node: configService.get<string>('ELASTICSEARCH_HOST') },

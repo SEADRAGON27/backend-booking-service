@@ -2,72 +2,33 @@ import { Controller } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { CreateNotification } from 'src/interfaces/createNotification.interface';
-import { rmqAck } from 'src/utils/rmqAck';
-import { rmqNack } from 'src/utils/rmqNack';
-import { WinstonLoggerService } from 'src/logs/logger';
+import { Log } from 'src/decorators/log.decorator';
 
 @Controller()
 export class NotificationController {
-  constructor(
-    private readonly notificationService: NotificationService,
-    private readonly logger: WinstonLoggerService,
-  ) {}
+  constructor(private readonly notificationService: NotificationService) {}
 
   @EventPattern('user_create_verification_email')
-  async sendVerificationEmailUserCreate(
-  @Payload('email') email: string, 
-  @Payload('token') token: string, 
-  @Payload('logId') logId: string, 
-  @Ctx() context: RmqContext) {
-    try {
-      await this.notificationService.sendVerificationEmailUserCreate(email, token);
-      rmqAck(context);
-
-      this.logger.log(`Verification email has been sent to user's email:${email} , logId:${logId}`);
-    } catch (error) {
-      rmqNack(context);
-      this.logger.log(`Error sending verification email to user's email:${email} , logId:${logId}, error:${error.message}`);
-    }
+  @Log()
+  async sendVerificationEmailUserCreate(@Payload('email') email: string, @Payload('token') token: string, @Payload('logId') logId: string, @Ctx() context: RmqContext) {
+    await this.notificationService.sendVerificationEmailUserCreate(email, token);
   }
 
   @EventPattern('reset_password_varification_email')
+  @Log()
   async sendVerificationEmailResetPassword(@Payload('email') email: string, @Payload('token') token: string, @Payload('logId') logId: string, @Ctx() context: RmqContext) {
-    try {
-      await this.notificationService.sendVerificationEmailResetPassword(email, token);
-      rmqAck(context);
-
-      this.logger.log(`Reset password email has been sent to user's email: ${email}, logId: ${logId}`);
-    } catch (error) {
-      rmqNack(context);
-      this.logger.error(`Error sending reset password email to user's email: ${email}, logId: ${logId}, error: ${error.message}`);
-    }
+    await this.notificationService.sendVerificationEmailResetPassword(email, token);
   }
 
   @EventPattern('create_notification')
+  @Log()
   async createNotification(@Payload('createNotificationData') createNotificationData: CreateNotification, @Ctx() context: RmqContext) {
-    const { logId } = createNotificationData;
-
-    try {
-      await this.notificationService.createNotification(createNotificationData);
-      rmqAck(context);
-
-      this.logger.log(`Notification created successfully for data: ${JSON.stringify(createNotificationData)},logId:${logId}`);
-    } catch (error) {
-      rmqNack(context);
-      this.logger.error(`Error creating notification for data: ${JSON.stringify(createNotificationData)},logId:${logId}, error:${error.message}`);
-    }
+    await this.notificationService.createNotification(createNotificationData);
   }
 
   @EventPattern('delete_notification')
+  @Log()
   async deleteNotification(@Payload('meetingId') meetingId: string, @Payload('logId') logId: string, @Ctx() context: RmqContext) {
-    try {
-      await this.notificationService.deleteNotification(meetingId);
-      rmqAck(context);
-
-      this.logger.log(`Notification deleted successfully for meetingId: ${meetingId},logId:${logId}`);
-    } catch (error) {
-      rmqNack(error);
-      this.logger.log(`Error deleting notification for meetingId: ${meetingId},logId:${logId}, error: ${error.message}`);
-    }
+    await this.notificationService.deleteNotification(meetingId);
   }
 }
