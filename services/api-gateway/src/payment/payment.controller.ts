@@ -21,6 +21,6 @@ export class PaymentController {
 
   @Post('handle-webhook')
   handleLiqPayWebhook(@Body() webhookData) {
-    this.paymentClient.send({ cmd: 'generate_webform' }, webhookData).pipe(timeout(5000));
+    this.paymentClient.send({ cmd: 'handle_liqPay_webhook' }, webhookData).pipe(timeout(5000));
   }
 }
