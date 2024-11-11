@@ -21,7 +21,7 @@ export class PaymentController {
     return paymentForm;
   }
 
-  @MessagePattern({ cmd: 'handle_liqPay_weebHook' })
+  @MessagePattern({ cmd: 'handle_liqPay_webhook' })
   @Log()
   async handleLiqPayWebook(webhookData) {
     let meetingId: string | boolean;
