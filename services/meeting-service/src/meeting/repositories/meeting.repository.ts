@@ -14,15 +14,15 @@ export class MeetingRepository {
     this.prisma.meeting.update({ where: { id }, data: updateMeetingData });
   }
 
-  async checkAvailability(startTime: Date, endTime: Date, roomId: string) {
+  async checkAvailability(startTime: string, endTime: string, roomId: string) {
     return this.prisma.meeting.findMany({
       where: {
         roomId,
         startTime: {
-          lte: startTime,
+          lte: new Date(startTime),
         },
         endTime: {
-          gte: endTime,
+          gte: new Date(endTime),
         },
       },
     });

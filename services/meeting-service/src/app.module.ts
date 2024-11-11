@@ -3,7 +3,12 @@ import { MeetingModule } from './meeting/meeting.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), MeetingModule],
+  imports: [
+    MeetingModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+  ],
   controllers: [],
   providers: [],
 })

@@ -4,7 +4,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateBuildingType } from './interfaces/createBuildingType.interface';
 import { UpdateBuildingType } from './interfaces/updateBuildingType.interfacce';
 import { WinstonLoggerService } from 'src/logs/logger';
-import { exceptionType } from 'utils/exceptionType';
+import { exceptionType } from 'src/utils/exceptionType';
 
 @Controller()
 export class BuildingTypeController {

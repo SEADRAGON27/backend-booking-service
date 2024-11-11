@@ -24,7 +24,6 @@ export class RoomController {
   @UseInterceptors(FilesInterceptor('images', 10, multerConfig))
   @UsePipes(new ValidationPipe({ transform: true }))
   async createRoom(@Body() createRoomDto: CreateRoomDto, @UploadedFiles() files: Express.Multer.File[]) {
-    console.log(createRoomDto);
     const serializedFiles = files.map((file) => ({
       originalname: file.originalname,
       mimetype: file.mimetype,
@@ -44,7 +43,7 @@ export class RoomController {
   @UseGuards(new JwtAuthGuard(), RolesGuard)
   @Roles('admin')
   updateRoom(@Param('id') id: string, updateRoomDto: UpdateRoomDto) {
-    return this.client.send({ cmd: 'create_room' }, { id, updateRoomDto }).pipe(
+    return this.client.send({ cmd: 'update_room' }, { id, updateRoomDto }).pipe(
       timeout(5000),
       catchError((error) => {
         throw new HttpException(error.message, error.statusCode);

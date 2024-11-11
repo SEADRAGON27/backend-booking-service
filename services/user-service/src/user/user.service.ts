@@ -62,10 +62,10 @@ export class UserService {
 
     await this.refreshSessionRepository.create({ userId: user.id, refreshToken, fingerprint });
 
-    this.notificationClient.emit('user_create_verification_email', { token: user.confirmationToken, email: user.email, logId }).pipe(
+    /*this.notificationClient.emit('user_create_verification_email', { token: user.confirmationToken, email: user.email, logId }).pipe(
       timeout(5000),
       catchError(async () => this.logger.error('Notification service is unavailable!')),
-    );
+    );*/
 
     const { password, ...userWitoutPassword } = user;
 

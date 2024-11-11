@@ -1,4 +1,4 @@
-import { exceptionType } from 'utils/exceptionType';
+import { exceptionType } from 'src/utils/exceptionType';
 import { ConfigService } from '@nestjs/config';
 import { WinstonLoggerService } from 'src/logs/logger';
 
@@ -12,12 +12,12 @@ export function Log() {
       try {
         const result = await originalMethod.apply(this, args);
 
-        winstonLoggerService.log(`Response for FUNCTION - ${propertyName} with data: ${JSON.stringify(args, null, 2)}`);
+        winstonLoggerService.log(`Response from the function - ${propertyName} with data: ${JSON.stringify(args, null, 2)}`);
 
         return result;
       } catch (error) {
         if (exceptionType(error)) {
-          winstonLoggerService.error(`Error in request to FUNCTION - ${propertyName}: ${error.message} with data: ${JSON.stringify(args, null, 2)}`);
+          winstonLoggerService.error(`Error in the function - ${propertyName} request : ${error.message} with data: ${JSON.stringify(args, null, 2)}`);
         }
 
         throw error;

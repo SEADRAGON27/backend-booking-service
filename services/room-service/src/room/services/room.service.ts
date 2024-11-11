@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateRoom } from 'src/interface/createRoom.interface';
+import { CreateRoom } from 'src/interfaces/createRoom.interface';
 import { RoomRepository } from '../repositories/room.repository';
 import { Room } from '@prisma/client';
-import { UpdateRoom } from 'src/interface/updateRoom.interface';
+import { UpdateRoom } from 'src/interfaces/updateRoom.interface';
 import { S3Service } from 'src/room/services/s3.service';
-import { DeserializedFiles } from 'src/interface/deserializedFile.interface';
+import { DeserializedFiles } from 'src/interfaces/deserializedFile.interface';
 import { ImageLinkRepository } from '../repositories/imageLink.repository';
 import { RoomImageLinkRepository } from '../repositories/roomIMageLink.repository';
 import { PrismaService } from 'src/database/prisma.service';
@@ -59,21 +59,11 @@ export class RoomService {
 
     await this.s3Service.deleteImages(imageLinks);
 
-    const imageLinkss = await this.prisma.imageLink.findMany({
-      where: {
-        rooms: {
-          some: { roomId: room.id },
-        },
-      },
-    });
+    const imageLinksByRoomId = await this.imageLinkRepository.findImageLinksByRoomId(room.id);
 
-    const imageLinkIds = imageLinkss.map((imageLink) => imageLink.id);
+    const imageLinkIds = imageLinksByRoomId.map((imageLink) => imageLink.id);
 
-    await this.prisma.imageLink.deleteMany({
-      where: {
-        id: { in: imageLinkIds },
-      },
-    });
+    await this.imageLinkRepository.deleteAll(imageLinkIds);
 
     await this.roomRepository.delete(id);
   }

@@ -45,7 +45,7 @@ export class MeetingController {
   @UseGuards(new JwtAuthGuard(), RolesGuard)
   @Roles('admin')
   findAll(@Query() query: ParsedQs) {
-    this.meetingClient.send({ cmd: 'all_meetings' }, query).pipe(
+    return this.meetingClient.send({ cmd: 'all_meetings' }, query).pipe(
       timeout(5000),
       catchError((error) => {
         throw new HttpException(error.message, error.statusCode);
@@ -56,7 +56,7 @@ export class MeetingController {
   @Get('/user')
   @UseGuards(new JwtAuthGuard())
   findUserMeetings(@Query() query: ParsedQs, @CurrentUser('id') id: string) {
-    this.meetingClient.send({ cmd: 'user_meetings' }, { query, id }).pipe(
+    return this.meetingClient.send({ cmd: 'user_meetings' }, { query, id }).pipe(
       timeout(5000),
       catchError((error) => {
         throw new HttpException(error.message, error.statusCode);

@@ -20,6 +20,7 @@ model Meeting {
   updatedAt   DateTime     @updatedAt  @map("updated_at")
    
   @@index([roomId]) 
+  @@index([startTime])
   @@map("meetings")
 }
 

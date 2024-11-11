@@ -11,6 +11,7 @@ model Notification {
   id Int @id @default(autoincrement())
   userId String  @map("user_id")
   meetingId String  @unique @map("meeting_id")
+  title String
   email  String
   startTime DateTime @map("start_time")
   message String
@@ -18,4 +19,5 @@ model Notification {
   updatedAt DateTime  @updatedAt @map("updated_at")
 
   @@index([userId])
+  @@map("notification")
 }

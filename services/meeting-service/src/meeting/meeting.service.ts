@@ -25,7 +25,7 @@ export class MeetingService {
 
     const isRoomAvailable = await this.meetingRepository.checkAvailability(startTime, endTime, roomId);
 
-    if (isRoomAvailable.length > 0) throw new RpcException({ message: 'Room is not available for the selected time', statusCode: HttpStatus.FORBIDDEN });
+    if (isRoomAvailable.length > 0) throw new HttpException('Room is not available for the selected time', HttpStatus.FORBIDDEN);
 
     const meetingUser = await this.meetingUserRepository.findById(user.id);
 
@@ -36,8 +36,8 @@ export class MeetingService {
     const meetingData = {
       title,
       roomId,
-      startTime,
-      endTime,
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
       meetingUser: {
         connect: { id: meetingUser.id },
       },

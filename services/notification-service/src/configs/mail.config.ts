@@ -7,8 +7,8 @@ export const mailerConfig = async (configService: ConfigService): Promise<Mailer
     port: 587,
     secure: false,
     auth: {
-      user: configService.get<string>('EMAIL'),
-      pass: configService.get<string>('PASSWORD'),
+      user: configService.get<string>('API_KEY'),
+      pass: configService.get<string>('APi_SECRET'),
     },
   },
 });

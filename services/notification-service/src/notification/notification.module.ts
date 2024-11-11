@@ -7,10 +7,12 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { mailerConfig } from 'src/configs/mail.config';
 import { DatabaseModule } from 'src/database/database.module';
 import { WinstonLoggerService } from 'src/logs/logger';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     DatabaseModule,
+    ScheduleModule.forRoot(),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

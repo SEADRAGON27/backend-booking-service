@@ -15,7 +15,7 @@ import { RoomController } from './room/room.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { BuildingTypeController } from './buildingType/buildingType.controller';
-import { MeetingController } from './meetings/meeting.controller';
+import { MeetingController } from './meeting/meeting.controller';
 import { PaymentController } from './payment/payment.controller';
 @Module({
   imports: [

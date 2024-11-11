@@ -22,7 +22,7 @@ export class NotificationController {
 
   @EventPattern('create_notification')
   @Log()
-  async createNotification(@Payload('createNotificationData') createNotificationData: CreateNotification, @Ctx() context: RmqContext) {
+  async createNotification(@Payload() createNotificationData: CreateNotification, @Ctx() context: RmqContext) {
     await this.notificationService.createNotification(createNotificationData);
   }
 

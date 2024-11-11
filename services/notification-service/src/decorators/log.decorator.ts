@@ -15,14 +15,14 @@ export function Log() {
       try {
         const result = await originalMethod.apply(this, args);
         rmqAck(context);
-        winstonLoggerService.log(`Response for FUNCTION - ${propertyName} with data: ${JSON.stringify(args, null, 2)}`);
+        winstonLoggerService.log(`Response from the function - ${propertyName} with data: ${JSON.stringify(args, null, 2)}`);
 
         return result;
       } catch (error) {
         rmqNack(context);
-        winstonLoggerService.error(`Error in request to FUNCTION - ${propertyName}: ${error.message} with data: ${JSON.stringify(args, null, 2)}`);
+        winstonLoggerService.error(`Error in the function - ${propertyName} request : ${error.message} with data: ${JSON.stringify(args, null, 2)}`);
 
-        throw error;
+        //throw error;
       }
     };
 

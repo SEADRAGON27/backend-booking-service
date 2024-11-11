@@ -1,10 +1,10 @@
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { RoomService } from './services/room.service';
-import { CreateRoom } from 'src/interface/createRoom.interface';
-import { UpdateRoom } from 'src/interface/updateRoom.interface';
-import { Controller } from '@nestjs/common';
-import { DeserializedFiles } from 'src/interface/deserializedFile.interface';
-import { SerializedFiles } from 'src/interface/serializedFIle.interface';
+import { CreateRoom } from 'src/interfaces/createRoom.interface';
+import { UpdateRoom } from 'src/interfaces/updateRoom.interface';
+import { Controller, HttpException } from '@nestjs/common';
+import { DeserializedFiles } from 'src/interfaces/deserializedFile.interface';
+import { SerializedFiles } from 'src/interfaces/serializedFIle.interface';
 import { ParsedQs } from 'qs';
 import { Log } from 'src/decorators/log.decorator';
 
@@ -20,8 +20,8 @@ export class RoomController {
       buffer: Buffer.from(file.buffer, 'base64'),
     }));
 
-    const room = await this.roomService.createRoom(createRoomData, deserializedFiles);
-
+    const room = await this.roomService.createRoom(createRoomData, deserializedFiles);*/
+  
     return room;
   }
 

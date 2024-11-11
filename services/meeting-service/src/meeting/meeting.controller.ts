@@ -3,18 +3,13 @@ import { MeetingService } from './meeting.service';
 import { Ctx, EventPattern, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { CreateMeeting } from 'src/interfaces/createMeeting.interface';
 import { ParsedQs } from 'qs';
-import { rmqAck } from 'src/utils/rmqAck';
 import { MeetingUser } from '@prisma/client';
 import { UserData } from 'src/interfaces/userData.interface';
 import { Log } from 'src/decorators/log.decorator';
-import { WinstonLoggerService } from 'src/logs/logger';
 
 @Controller()
 export class MeetingController {
-  constructor(
-    private readonly meetingService: MeetingService,
-    private logger: WinstonLoggerService,
-  ) {}
+  constructor(private readonly meetingService: MeetingService) {}
 
   @MessagePattern({ cmd: 'create_meeting' })
   @Log()
@@ -50,21 +45,12 @@ export class MeetingController {
 
   @EventPattern('confirm_meeting')
   async confirmMeeting(@Payload() id: string, @Ctx() context: RmqContext) {
-    try {
-      await this.meetingService.confirmMeeting(id);
-
-      rmqAck(context);
-
-      this.logger.log(`Meeting with ID: ${id} confirmed`);
-    } catch (error) {
-      this.logger.error(`Error confirming meeting with id: ${id}, error: ${error.message}`);
-      throw error;
-    }
+    await this.meetingService.confirmMeeting(id);
   }
 
   @EventPattern('delete_meeting_user')
   @Log()
-  async deleteMeetingUser(@Payload() userId: string) {
+  async deleteMeetingUser(@Payload() userId: string, @Ctx() context: RmqContext) {
     await this.meetingService.deleteMeetingUser(userId);
   }
 

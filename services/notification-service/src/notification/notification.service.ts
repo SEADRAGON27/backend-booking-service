@@ -49,10 +49,11 @@ export class NotificationService {
       message: `
           Meeting Reminder
 
-          You have a meeting titled \`${createNotificationData.title}\` starting in 1 hour.
+          You have a meeting title \`${createNotificationData.title}\` starting in 1 hour.
 
          Start time: \`${createNotificationData.startTime}\`
-         End time: \`${createNotificationData.endTime}}\``,
+         End time: \`${createNotificationData.endTime}\`
+         `,
     };
 
     const { endTime, ...rest } = notificationData;

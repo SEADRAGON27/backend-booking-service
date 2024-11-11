@@ -3,22 +3,22 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 import { Room } from '@prisma/client';
 import { Prisma } from '@prisma/client';
-import { ImageLinks } from 'src/interface/imageLinks.interface';
-import { CreateRoom } from 'src/interface/createRoom.interface';
+import { ImageLinks } from 'src/interfaces/imageLinks.interface';
+import { CreateRoom } from 'src/interfaces/createRoom.interface';
 
 @Injectable()
 export class RoomRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createRoomData: CreateRoom): Promise<Room> {
-    const { buildingTypeId, originalPrice, discountedPrice, ...rest } = createRoomData;
+    const { buildingTypeId, originalPrice, discountedPrice, ...roomData } = createRoomData;
 
     const originalPriceDecimal = new Prisma.Decimal(createRoomData.originalPrice as number);
     const discountedPriceDecimal = createRoomData.discountedPrice ? new Prisma.Decimal(createRoomData.discountedPrice as number) : null;
 
     return this.prisma.room.create({
       data: {
-        ...rest,
+        ...roomData,
         originalPrice: originalPriceDecimal,
         discountedPrice: discountedPriceDecimal,
         buildingType: {

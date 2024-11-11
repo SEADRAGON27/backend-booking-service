@@ -1,6 +1,6 @@
 export interface CreateNotification {
-  startTime: Date;
-  endTime: Date;
+  startTime: string;
+  endTime: string;
   email: string;
   meetingId: string;
   userId: string;

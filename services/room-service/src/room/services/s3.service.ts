@@ -1,7 +1,7 @@
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DeserializedFiles } from 'src/interface/deserializedFile.interface';
+import { DeserializedFiles } from 'src/interfaces/deserializedFile.interface';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
