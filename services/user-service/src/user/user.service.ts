@@ -62,10 +62,10 @@ export class UserService {
 
     await this.refreshSessionRepository.create({ userId: user.id, refreshToken, fingerprint });
 
-    /*this.notificationClient.emit('user_create_verification_email', { token: user.confirmationToken, email: user.email, logId }).pipe(
+    this.notificationClient.emit('user_create_verification_email', { token: user.confirmationToken, email: user.email, logId }).pipe(
       timeout(5000),
       catchError(async () => this.logger.error('Notification service is unavailable!')),
-    );*/
+    );
 
     const { password, ...userWitoutPassword } = user;
 
@@ -136,7 +136,6 @@ export class UserService {
 
   async updateUser(id: string, updateUserDto: UpdateUserDto, logId: string): Promise<CreateUserResponse> {
     const user = await this.userRepository.findById(id);
-    const token = uuidv4();
 
     if (updateUserDto.email) {
       const token = uuidv4();
@@ -274,14 +273,12 @@ export class UserService {
     const userByName = await this.userRepository.findByUsername(createUserGoogleData.username);
     const user = await this.userRepository.findByEmail(email);
 
-    const { password, ...userWitoutPassword } = user;
-
     if (userByName?.username && user?.username && userByName.username === user.username) {
       const refreshToken = this.generateRefreshToken(user);
 
       await this.refreshSessionRepository.create({ userId: user.id, refreshToken, fingerprint });
 
-      return { user: { ...userWitoutPassword }, refreshToken };
+      return { user, refreshToken };
     }
 
     if (userByName) throw new HttpException('Name is taken', HttpStatus.UNPROCESSABLE_ENTITY);
@@ -299,15 +296,13 @@ export class UserService {
 
       await this.refreshSessionRepository.create({ userId: user.id, refreshToken, fingerprint });
 
-      const { password, ...userWitoutPassword } = user;
-
-      return { user: { ...userWitoutPassword }, refreshToken };
+      return { user, refreshToken };
     }
 
     const refreshToken = this.generateRefreshToken(user);
 
     await this.refreshSessionRepository.create({ userId: user.id, refreshToken, fingerprint });
 
-    return { user: { ...userWitoutPassword }, refreshToken };
+    return { user, refreshToken };
   }
 }

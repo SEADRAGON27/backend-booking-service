@@ -42,11 +42,22 @@ export class UserController {
 
   @Post('/login')
   @UsePipes(new ValidationPipe())
-  loginUser(@Body() loginUserDto: LoginUserDto, @Fingerprint() fingerprint: IFingerprint) {
+  loginUser(@Body() loginUserDto: LoginUserDto, @Fingerprint() fingerprint: IFingerprint, @Res({ passthrough: true }) res: Response) {
     const fingerprintId = fingerprint.id;
 
     return this.client.send({ cmd: 'login_user' }, { loginUserDto, fingerprintId }).pipe(
       timeout(5000),
+      map((data) => {
+        const { refreshToken, userResponse } = data;
+
+        res.cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          maxAge: this.configService.get<number>('REFRESH_TOKEN_EXPIRATION_15DAYS'),
+        });
+
+        return userResponse;
+      }),
       catchError((error) => {
         throw new HttpException(error.message, error.statusCode);
       }),
@@ -56,7 +67,7 @@ export class UserController {
   @Put('/user')
   @UsePipes(new ValidationPipe())
   @UseGuards(new JwtAuthGuard())
-  updateUser(@CurrentUser('id') id: JwtPayload, @Body() updateUserDto: UpdateUserDto, @Res() res: Response) {
+  updateUser(@CurrentUser('id') id: JwtPayload, @Body() updateUserDto: UpdateUserDto, @Res({ passthrough: true }) res: Response) {
     const logId = uuidv4();
 
     return this.client.send({ cmd: 'update_user' }, { updateUserDto, id, logId }).pipe(
@@ -69,6 +80,7 @@ export class UserController {
         const { refreshToken, userResponse } = data;
         res.cookie('refreshToken', refreshToken, {
           httpOnly: true,
+          sameSite: 'strict',
           maxAge: this.configService.get<number>('REFRESH_TOKEN_EXPIRATION_15DAYS'),
         });
 
@@ -105,7 +117,7 @@ export class UserController {
   }
 
   @Post('/refresh')
-  refreshTokens(@Cookie('REFRESH_TOKEN') refrshToken: string, @Fingerprint() fingerprint: IFingerprint, @Res() res: Response) {
+  refreshTokens(@Cookie('REFRESH_TOKEN') refrshToken: string, @Fingerprint() fingerprint: IFingerprint, @Res({ passthrough: true }) res: Response) {
     const fingerprintId = fingerprint.id;
 
     return this.client.send({ cmd: 'refresh_tokens' }, { refrshToken, fingerprintId }).pipe(
@@ -115,6 +127,7 @@ export class UserController {
 
         res.cookie('refreshToken', refreshToken, {
           httpOnly: true,
+          sameSite: 'strict',
           maxAge: this.configService.get<number>('REFRESH_TOKEN_EXPIRATION_15DAYS'),
         });
 
@@ -164,11 +177,22 @@ export class UserController {
   }
 
   @Post('/confirm-email')
-  confirmEmailForRegistration(@Query('token') token: string, @Fingerprint() fingerprint: IFingerprint) {
+  confirmEmailForRegistration(@Query('token') token: string, @Fingerprint() fingerprint: IFingerprint, @Res({ passthrough: true }) res: Response) {
     const fingerprintId = fingerprint.id;
 
     return this.client.send({ cmd: 'confirm_email' }, { token, fingerprintId }).pipe(
       timeout(5000),
+      map((data) => {
+        const { refreshToken, userResponse } = data;
+
+        res.cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          maxAge: this.configService.get<number>('REFRESH_TOKEN_EXPIRATION_15DAYS'),
+        });
+
+        return userResponse;
+      }),
       catchError((error) => {
         throw new HttpException(error.message, error.statusCode);
       }),
@@ -189,16 +213,28 @@ export class UserController {
   }
 
   @Get('confirm-google')
-  confirmGoogle(@Query('token') token: string, @Res() res: Response) {
+  confirmGoogle(@Query('token') token: string) {
     return token;
   }
 
   @Get('success-google')
   @HttpCode(201)
-  successGoogle(@Body() createUserGoogleDto: CreateUserGoogleDto, @Res() res: Response, @Fingerprint() fingerprint: IFingerprint) {
+  successGoogle(@Body() createUserGoogleDto: CreateUserGoogleDto, @Res({ passthrough: true }) res: Response, @Fingerprint() fingerprint: IFingerprint) {
+    const fingerprintId = fingerprint.id;
+    
     return this.httpService.get(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${createUserGoogleDto.token}`).pipe(
-      mergeMap(({ data: { email } }) => this.client.send({ cmd: 'success-google' }, { email, fingerprint, createUserGoogleDto })),
-      map((userResponse) => userResponse),
+      mergeMap(({ data: { email } }) => this.client.send({ cmd: 'success-google' }, { email, fingerprintId, createUserGoogleDto })),
+      map((data) => {
+        const { refreshToken, user } = data;
+
+        res.cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          sameSite: 'strict',
+          maxAge: this.configService.get<number>('REFRESH_TOKEN_EXPIRATION_15DAYS'),
+        });
+
+        return user;
+      }),
       catchError((error) => {
         throw new HttpException(error.message, error.statusCode);
       }),

@@ -40,7 +40,7 @@ export class UserController {
   async updateUser(@Payload('updateUserDto') updateUserData: UpdateUserDto, @Payload('id') id: string, @Payload('logId') logId: string) {
     const data = await this.userService.updateUser(id, updateUserData, logId);
 
-    if (!data) return false;
+    if (!data) return null;
 
     const { user, refreshToken } = data;
     const userResponse = this.userService.buildUserResponse(user);
