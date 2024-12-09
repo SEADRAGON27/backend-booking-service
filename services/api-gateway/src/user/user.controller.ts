@@ -22,7 +22,6 @@ export class UserController {
   constructor(
     @Inject('USER_SERVICE') private readonly client: ClientProxy,
     private readonly httpService: HttpService,
-    @Inject('MEETING_SERVICE') private readonly meetingClient: ClientProxy,
     private readonly configService: ConfigService,
   ) {}
 
